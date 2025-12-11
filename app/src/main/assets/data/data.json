@@ -1,0 +1,20 @@
+[
+  {
+    "category": "anime",
+    "subCategories": [
+      "naruto",
+      "bleach",
+      "one piece",
+      "Attack on Titan",
+      "Dragon Ball",
+      "My Hero Academia"
+    ]
+  },
+  {
+    "category": "cartoon",
+    "subCategories": [
+      "tom & jerry",
+      "ben 10"
+    ]
+  }
+]

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "886940532182",
+    "project_id": "ardraw-858db",
+    "storage_bucket": "ardraw-858db.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:886940532182:android:d68af129630e3a31113877",
+        "android_client_info": {
+          "package_name": "com.example.ardraw"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAIaHkoce2xdqAp2mQdpLIOM6zYcWEMMDk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
