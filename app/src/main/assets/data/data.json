@@ -14,7 +14,92 @@
     "category": "cartoon",
     "subCategories": [
       "tom & jerry",
-      "ben 10"
+      "ben 10",
+      "Scooby Doo",
+      "The Simpsons",
+      "Rick and Morty"
+    ]
+  },
+  {
+    "category": "nature",
+    "subCategories": [
+      "flowers",
+      "trees",
+      "landscapes",
+      "mountains",
+      "ocean scenes"
+    ]
+  },
+  {
+    "category": "animals",
+    "subCategories": [
+      "cats",
+      "dogs",
+      "birds",
+      "wildlife",
+      "marine life",
+      "insects"
+    ]
+  },
+  {
+    "category": "fantasy",
+    "subCategories": [
+      "dragons",
+      "elves",
+      "wizards",
+      "mythology",
+      "magic circles"
+    ]
+  },
+  {
+    "category": "vehicles",
+    "subCategories": [
+      "cars",
+      "motorcycles",
+      "airplanes",
+      "boats",
+      "spaceships"
+    ]
+  },
+  {
+    "category": "architecture",
+    "subCategories": [
+      "buildings",
+      "cityscapes",
+      "bridges",
+      "castles",
+      "interiors"
+    ]
+  },
+  {
+    "category": "objects",
+    "subCategories": [
+      "food",
+      "household items",
+      "tools",
+      "musical instruments",
+      "shoes"
+    ]
+  },
+  {
+    "category": "portraits",
+    "subCategories": [
+      "eyes",
+      "faces",
+      "hands",
+      "full body pose",
+      "hair styles"
+    ]
+  },
+  {
+    "category": "patterns",
+    "subCategories": [
+      "mandala",
+      "geometric",
+      "zentangle",
+      "tattoos",
+      "abstract lines"
     ]
   }
 ]
+
