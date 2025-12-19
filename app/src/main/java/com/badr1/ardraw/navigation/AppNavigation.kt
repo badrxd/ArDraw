@@ -76,7 +76,7 @@ fun AppNavigation(modifier: Modifier = Modifier) {
         }
 
         composable(Screen.TextRoute.route) {
-            TextScreen(modifier, navController)
+            TextScreen(modifier, navController, vm2)
         }
     }
 }
