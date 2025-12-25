@@ -17,3 +17,18 @@ val PurpleBoxColor = Color(0xFF9B7BCF)
 val BlueBoxColor = Color(0xFF7BAFE1)
 val PinkBoxColor = Color(0xFFD7A6C1)
 val CyanBoxColor = Color(0xFF76C5C3)
+
+
+val CustomPurple = Color(0xFF5929CA)
+val CustomPurpleToPink = Color(0xFF965679)
+val CustomBlue = Color(0xFF3467A9)
+val CustomBrown = Color(0xFFB16A12)
+val CustomOrange = Color(0xFF5929CA)
+val CustomPink = Color(0xFFFF66DB)
+val CustomLightGray = Color(0xFFF2F2F2)
+val CustomYellow = Color(0xFFF0E687)
+
+
+
+
+

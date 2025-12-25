@@ -1,10 +1,12 @@
 package com.badr1.ardraw.screens
 
 
+import android.util.Log
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -45,6 +47,7 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -63,58 +66,9 @@ import com.badr1.ardraw.screens.DrawImageType.ImageSourceType
 import com.badr1.ardraw.ui.theme.PurpleBoxColor
 import com.badr1.ardraw.screens.components.Header
 import com.badr1.ardraw.screens.components.MediumImageBox
+import com.badr1.ardraw.ui.theme.CustomPurple
 import com.badr1.ardraw.viewmodels.SharedDrawImageViewModel
 
-@Composable
-fun ImagesByCategoryScreen(
-    modifier: Modifier, vm: ImagesByCategory, navController: NavController,
-    vm2: SharedDrawImageViewModel
-) {
-
-    val categories = vm.categories
-    val selectedCategory by vm.selectedCategory
-    val imagesDisplayingControl = vm.imagesDisplayingControl
-
-    Column(modifier.fillMaxSize()) {
-        val sampleImages = remember {
-            listOf(
-                ("https://fiverr-res.cloudinary.com/images/q_auto,f_auto/gigs/353470320/original/0d174e382b40bac71b9b8fcca56a41bbdb8a94df/make-an-eyecatching-anime-banner.jpg"),
-                ("https://whatsondisneyplus.b-cdn.net/wp-content/uploads/2020/12/animation-collection-banner-scaled-e1607164188786.jpg"),
-                ("https://www.shutterstock.com/image-vector/set-abstract-nature-seascape-tropical-260nw-2635092447.jpg"),
-                // Replace with your actual image URLs or local resource IDs
-            )
-        }
-
-        Header("Draw with Template", navController)
-        Spacer(modifier.height(8.dp))
-        AutoImageSlider(images = sampleImages)
-        Spacer(modifier.height(8.dp))
-        CategoriesSlider(vm.categories, selectedCategory, onClick = { cat ->
-            vm.onCategoryChanged(cat)
-        })
-        if (vm.isLoading.value) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                CircularProgressIndicator(
-                    color = PurpleBoxColor
-                )
-            }
-        }
-
-        vm.errorMessage.value?.let { error ->
-            Text(text = error, color = Color.Red)
-        }
-        if (vm.imagesDisplayingControl.isNotEmpty()) {
-            SubcategoriesBox(imagesDisplayingControl, navController, onImageClick = { image ->
-                vm2.setSelectedImage(image)
-                navController.navigate(Screen.DrawOptionRoute.route)
-            })
-        }
-    }
-}
 
 
 @Composable
@@ -183,7 +137,7 @@ fun CategoriesSlider(
     onClick: (Category) -> Unit
 ) {
     LazyRow(
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        contentPadding = PaddingValues(horizontal = 0.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(categories) { cat ->
@@ -193,6 +147,7 @@ fun CategoriesSlider(
                 onClick = { onClick(cat) })
         }
     }
+    Spacer(modifier = Modifier.width(2.dp))
 }
 
 @Composable
@@ -201,11 +156,15 @@ fun CategoryBox(
 ) {
     Box(
         modifier = Modifier
+            .clip(RoundedCornerShape(12.dp))
             .background(
-                color = if (isSelected) PurpleBoxColor else Color.Transparent,
-                shape = RoundedCornerShape(12.dp)
+                color = if (isSelected) CustomPurple.copy(alpha = 0.2f) else Color.Transparent
             )
-            .clickable {
+            .clickable(
+                // This part removes the flicker/ripple
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) {
                 onClick()
             }
             .padding(horizontal = 16.dp, vertical = 8.dp)) {
@@ -213,7 +172,7 @@ fun CategoryBox(
             text = category.category.replaceFirstChar {
                 if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
             },
-            color = if (isSelected) Color.White else Color.Gray,
+            color = if (isSelected) CustomPurple else Color.Gray,
             style = if (isSelected) MaterialTheme.typography.subtitle2 else MaterialTheme.typography.subtitle2.copy(
                 fontWeight = FontWeight.Normal
             ),
@@ -230,14 +189,24 @@ fun SubcategoriesBox(
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(top = 8.dp)
-        ) {
-            items(subcategories) { item ->
-                SubcategoryBox(item, navController = navController, onImageClick = { image ->
-                    onImageClick(image)
-                })
+        Log.d("SubcategoryBox", "Subcategories: $subcategories")
+        if (subcategories.isEmpty()) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = "No Images Found", color = Color.Gray)
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(top = 8.dp, bottom = 46.dp)
+            ) {
+                items(subcategories) { item ->
+                    SubcategoryBox(item, navController = navController, onImageClick = { image ->
+                        onImageClick(image)
+                    })
+                }
             }
         }
     }
@@ -249,19 +218,17 @@ fun SubcategoryBox(
     navController: NavController,
     onImageClick: (ImageSourceType) -> Unit
 ) {
-    if (subcategory.images.isEmpty()) {
-        return
-    }
     val title = subcategory.subcategory.subcategory
+
     Column(
         Modifier
             .fillMaxWidth()
-            .padding(vertical = 12.dp)
+//            .padding(vertical = 12.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 4.dp),
+                .padding(horizontal = 0.dp, vertical = 0.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -282,7 +249,7 @@ fun SubcategoryBox(
                         )
                     )
                 },
-                colors = ButtonDefaults.textButtonColors(contentColor = PurpleBoxColor)
+                colors = ButtonDefaults.textButtonColors(contentColor = CustomPurple.copy(alpha = 0.7f))
             ) {
                 Text("See All", style = MaterialTheme.typography.button)
             }
@@ -290,7 +257,7 @@ fun SubcategoryBox(
 
         Spacer(modifier = Modifier.height(2.dp))
         LazyRow(
-            contentPadding = PaddingValues(horizontal = 16.dp),
+            contentPadding = PaddingValues(horizontal = 2.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             itemsIndexed(subcategory.images) { index, item ->
@@ -303,6 +270,7 @@ fun SubcategoryBox(
                 } else if (index == 4) {
                     val imageCardModifier =
                         Modifier
+                            .background(Color.Transparent)
                             .width(120.dp)
                             .height(120.dp)
 //                            .padding(end = 12.dp)
@@ -317,7 +285,7 @@ fun SubcategoryBox(
 
                     val cornerRadiusDp = 12.dp
                     val borderWidth = 2.dp
-                    val dashPattern = floatArrayOf(8f, 8f) // 8 units line, 8 units gap
+                    val dashPattern = floatArrayOf(12f, 12f) // 8 units line, 8 units gap
 
                     Card(
                         modifier = imageCardModifier,
@@ -329,6 +297,7 @@ fun SubcategoryBox(
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
+                                .background(CustomPurple.copy(alpha = 0.1f))
                                 .drawBehind {
                                     val strokeWidthPx = borderWidth.toPx()
                                     val halfStroke = strokeWidthPx / 2f
@@ -346,7 +315,7 @@ fun SubcategoryBox(
 
                                     // Draw the rounded rectangle with the dashed stroke
                                     drawRoundRect(
-                                        color = PurpleBoxColor,
+                                        color = CustomPurple.copy(alpha = 0.7f),
                                         // Offset moves the rectangle inwards by half the stroke width
                                         topLeft = Offset(halfStroke, halfStroke),
                                         size = rectSize,
@@ -363,10 +332,10 @@ fun SubcategoryBox(
                                 Icon(
                                     modifier = Modifier.size(30.dp),
                                     painter = painterResource(id = R.drawable.outline_photo_library_24),
-                                    tint = PurpleBoxColor,
+                                    tint = CustomPurple.copy(alpha = 0.7f),
                                     contentDescription = "see more",
                                 )
-                                Text("See More", color = PurpleBoxColor)
+                                Text("See More", color = CustomPurple.copy(alpha = 0.7f))
                             }
                         }
                     }

@@ -45,6 +45,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.badr1.ardraw.navigation.Screen
 import com.badr1.ardraw.screens.DrawImageType.ImageSourceType
+import com.badr1.ardraw.screens.components.BannerAdView
 import com.badr1.ardraw.screens.components.Header
 import com.badr1.ardraw.ui.theme.PurpleBoxColor
 import com.badr1.ardraw.viewmodels.SharedDrawImageViewModel
@@ -72,7 +73,7 @@ fun TextScreen(modifier: Modifier, navController: NavController, vm2: SharedDraw
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Header("Text", navController, true, onClick = {
+            Header("Text", navController, true, onNext = {
                 vm2.setSelectedImage(ImageSourceType.BitMap(bitmap))
                 navController.navigate(Screen.DrawOptionRoute.route)
             })
@@ -112,6 +113,10 @@ fun TextScreen(modifier: Modifier, navController: NavController, vm2: SharedDraw
                     )
                 )
             }
+            BannerAdView(
+                modifier = modifier
+                    .fillMaxWidth().padding(vertical = 6.dp)
+            )
             Spacer(modifier = Modifier.weight(1f))
             Row(
                 modifier = Modifier
@@ -166,3 +171,4 @@ fun TextBox(textStyle: Int, isSelected: Boolean, onClick: () -> Unit) {
         )
     }
 }
+

@@ -11,7 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.badr1.ardraw.screens.utils.PermissionUtils
+import com.badr1.ardraw.viewmodels.utils.PermissionUtils
 import com.badr1.ardraw.viewmodels.MultiPermissionsViewModel
 import com.badr1.ardraw.viewmodels.PermissionStatus
 
@@ -19,7 +19,8 @@ import com.badr1.ardraw.viewmodels.PermissionStatus
 fun RequestPermissions(
     viewModel: MultiPermissionsViewModel = viewModel(),
     onAllGranted: () -> Unit,
-    onPermissionDenied: () -> Unit
+    onPermissionDenied: () -> Unit,
+    permissions: List<String>
 ) {
     val context = LocalContext.current
     val activity = context as? Activity
@@ -72,6 +73,10 @@ fun RequestPermissions(
 
     // Logic to trigger request or callback
     LaunchedEffect(permissionsRequested) {
+        if (PermissionUtils.requiredPermissions.isEmpty()) {
+            PermissionUtils.wantedPermissions(permissions)
+        }
+
         if (PermissionUtils.allPermissionsGranted(context)) {
             onAllGranted()
         } else if (!permissionsRequested) {
@@ -107,8 +112,12 @@ private fun PermissionDeniedDialog(
             androidx.compose.foundation.layout.Column {
                 Text("Please enable these permissions in settings:")
                 deniedPermissions.forEach {
-                    Text(
-                        "• ${PermissionUtils.getPermissionDisplayName(it)}",
+                    val permission = PermissionUtils.getPermissionDisplayName(it)
+                    if (permission == "Photos") Text(
+                        "• ${permission}: allow all",
+                        color = MaterialTheme.colors.error
+                    ) else Text(
+                        "• $permission",
                         color = MaterialTheme.colors.error
                     )
                 }

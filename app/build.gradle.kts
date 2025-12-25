@@ -25,7 +25,7 @@ android {
         applicationId = "com.badr1.ardraw"
         minSdk = 24
         targetSdk = 36
-        versionCode = 7  // ← Change to 6
+        versionCode = 1
         versionName = "1.0.0"  // ← Update version name
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -108,6 +108,7 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-database")
     implementation("com.google.firebase:firebase-storage")
+    implementation("com.google.firebase:firebase-auth-ktx:22.3.1")
 
     // DataStore
     implementation("androidx.datastore:datastore-preferences-core:1.1.1")
@@ -128,6 +129,9 @@ dependencies {
     implementation("androidx.hilt:hilt-navigation-compose:1.3.0")
     implementation("com.google.dagger:hilt-android:2.57.2")
     kapt("com.google.dagger:hilt-android-compiler:2.57.2")
+
+    // ads
+    implementation("com.google.android.gms:play-services-ads:23.5.0")
 
     // AndroidX & Material3
     implementation(libs.androidx.core.ktx)

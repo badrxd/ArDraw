@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.badr1.ardraw.ui.theme.PurpleBoxColor
 
@@ -76,13 +77,13 @@ fun LoadingSplashScreen() {
         modifier = Modifier
             .fillMaxSize()
             // Optional: Use a solid color background defined in your theme
-            .background(color = PurpleBoxColor),
+            .background(color = Color.White),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         // 1. App Logo/Icon
         Image(
-            painter = painterResource(id = R.drawable.paint_palette), // Replace with your actual drawable ID
+            painter = painterResource(id = R.drawable.ar_draw), // Replace with your actual drawable ID
             contentDescription = "App Logo",
             modifier = Modifier.size(128.dp)
         )
@@ -91,7 +92,7 @@ fun LoadingSplashScreen() {
 
         // 2. Progress Indicator (using the inverse color for visibility)
         CircularProgressIndicator(
-            color = MaterialTheme.colorScheme.onPrimary,
+            color = PurpleBoxColor,
             strokeWidth = 4.dp
         )
 
@@ -100,7 +101,7 @@ fun LoadingSplashScreen() {
         // 3. Status Text
         Text(
             text = "Loading Data...",
-            color = Color.Black,
+            color = PurpleBoxColor,
             style = MaterialTheme.typography.titleMedium
         )
     }
@@ -209,4 +210,10 @@ fun ErrorScreen(message: String, onRetry: () -> Unit) {
             )
         }
     }
+}
+
+@Preview(showBackground = true, showSystemUi = true, device = "spec:width=411dp,height=891dp")
+@Composable
+fun InternetRequiredScreenPreview() {
+    LoadingSplashScreen()
 }

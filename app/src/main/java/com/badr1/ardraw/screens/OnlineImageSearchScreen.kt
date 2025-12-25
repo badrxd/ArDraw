@@ -27,7 +27,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import coil.imageLoader
 import coil.request.ImageRequest
-import com.badr1.ardraw.GOOGLE_IMAGES_URL
+import com.badr1.ardraw.SEARCH_ENGINE_IMAGES_URL
 import com.badr1.ardraw.MOBILE_UA
 import com.badr1.ardraw.navigation.Screen
 import com.badr1.ardraw.screens.DrawImageType.ImageSourceType
@@ -229,7 +229,7 @@ fun OnlineImageSearchScreen(
                     }
 
                     webViewRef.value = this
-                    loadUrl("${GOOGLE_IMAGES_URL}easy+line+drawings")
+                    loadUrl("${SEARCH_ENGINE_IMAGES_URL}easy+line+drawings")
                 }
             }
         )

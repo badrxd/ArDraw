@@ -1,4 +1,4 @@
-package com.badr1.ardraw.screens.utils
+package com.badr1.ardraw.viewmodels.utils
 
 import com.badr1.ardraw.screens.DrawImageType.ImageSourceType
 

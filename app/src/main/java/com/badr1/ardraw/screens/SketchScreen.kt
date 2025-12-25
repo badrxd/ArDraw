@@ -80,8 +80,8 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.badr1.ardraw.R
 import com.badr1.ardraw.screens.components.RequestPermissions
-import com.badr1.ardraw.screens.utils.PermissionUtils
-import com.badr1.ardraw.screens.utils.createPublicImageOutputOptions
+import com.badr1.ardraw.viewmodels.utils.PermissionUtils
+import com.badr1.ardraw.viewmodels.utils.createPublicImageOutputOptions
 import com.badr1.ardraw.ui.theme.PurpleBoxColor
 import com.badr1.ardraw.viewmodels.MultiPermissionsViewModel
 
@@ -95,7 +95,8 @@ fun DrawImageScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     val viewModel: MultiPermissionsViewModel = viewModel()
 
-//    var imageSource by remember { mutableStateOf<ImageSourceType>(imageSource) }
+    val permissions = listOf("camera")
+
     // FIX: Initialize state correctly so it doesn't disappear
     var showCamImage by remember {
         mutableStateOf(PermissionUtils.allPermissionsGranted(context))
@@ -106,7 +107,6 @@ fun DrawImageScreen(
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-
                 refreshTrigger++
             }
         }
@@ -116,7 +116,7 @@ fun DrawImageScreen(
 
     // This handles the logic and popup UI
     key(refreshTrigger) {
-        RequestPermissions(viewModel, onAllGranted = {
+        RequestPermissions(viewModel, permissions = permissions, onAllGranted = {
             showCamImage = true
         }, onPermissionDenied = {
             showCamImage = false

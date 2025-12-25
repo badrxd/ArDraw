@@ -1,10 +1,14 @@
 package com.badr1.ardraw.screens
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.os.Build
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.material.Icon
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,13 +16,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -26,15 +37,27 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.badr1.ardraw.screens.components.Header
 import com.badr1.ardraw.screens.components.LargeImageBox
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.sp
 import com.badr1.ardraw.R
+import com.badr1.ardraw.navigation.Screen
 import com.badr1.ardraw.screens.DrawImageType.ImageSourceType
+import com.badr1.ardraw.screens.components.BannerAdView
 import com.badr1.ardraw.screens.components.RequestPermissions
+import com.badr1.ardraw.ui.theme.CustomBlue
+import com.badr1.ardraw.ui.theme.CustomBrown
+import com.badr1.ardraw.ui.theme.CustomPurple
 import com.badr1.ardraw.ui.theme.PurpleBoxColor
 import com.badr1.ardraw.viewmodels.SharedDrawImageViewModel
 
@@ -45,28 +68,14 @@ fun DrawOptionScreen(
     image: ImageSourceType,
     vm2: SharedDrawImageViewModel
 ) {
-    val permissions = mutableListOf(Manifest.permission.CAMERA)
-
-// Storage handling
-    when {
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
-            permissions += Manifest.permission.READ_MEDIA_IMAGES
-        }
-
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
-            permissions += Manifest.permission.READ_EXTERNAL_STORAGE
-        }
-
-        else -> {
-            permissions += Manifest.permission.READ_EXTERNAL_STORAGE
-            permissions += Manifest.permission.WRITE_EXTERNAL_STORAGE
-        }
-    }
+    val permissions = listOf("camera")
     var proceedToNextScreen by remember { mutableStateOf(false) }
 
     Column(
         modifier
-            .fillMaxSize()
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.SpaceBetween,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Header("Sketch & Trace", navController)
         Column(
@@ -76,13 +85,18 @@ fun DrawOptionScreen(
                 .padding(16.dp)
         ) {
             Spacer(modifier.height(24.dp))
-            LargeImageBox(image, 400)
+            LargeImageBox(image, 300,360)
+            BannerAdView(
+                modifier = modifier.padding(vertical = 16.dp)
+                    .fillMaxWidth()
+            )
             Spacer(modifier = Modifier.weight(1f))
             if (proceedToNextScreen) {
                 RequestPermissions(
+                    permissions = permissions,
                     onAllGranted = {
                         proceedToNextScreen = false
-//                        vm2.setSelectedImage(ImageSourceType.Url(url))
+                        vm2.setSelectedImage(image)
                         navController.navigate("draw_image")
                     },
                     onPermissionDenied = {
@@ -92,34 +106,29 @@ fun DrawOptionScreen(
             Column(modifier.fillMaxWidth()) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     CustomSelectableButton(
-                        text = "Camera",
+                        title = "Camera",
                         icon = R.drawable.rounded_photo_camera_24,
+                        imageRes = R.drawable.custom_selectable_button_2,
                         onClick = {
                             proceedToNextScreen = true
                         },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        color = CustomBlue
                     )
                     CustomSelectableButton(
-                        text = "Canvas",
+                        title = "Canvas",
                         icon = R.drawable.outline_phone_android_24,
-                        onClick = {},
-                        modifier = Modifier.weight(1f)
+                        imageRes = R.drawable.custom_selectable_button_1,
+                        onClick = {
+                            navController.navigate(Screen.TraceImageRoute.route)
+                        },
+                        modifier = Modifier.weight(1f),
+                        color = CustomBrown
                     )
                 }
-//                if (proceedToNextScreen) {
-//                    RequestPermissions(
-//                        onAllGranted = {
-//                            proceedToNextScreen = false
-//                            vm2.setSelectedImage(ImageSourceType.Url(url))
-//                            navController.navigate("draw_image")
-//                        },
-//                        onPermissionDenied = {
-//                            proceedToNextScreen = false
-//                        })
-//                }
             }
         }
     }
@@ -127,53 +136,86 @@ fun DrawOptionScreen(
 
 @Composable
 fun CustomSelectableButton(
-    text: String,
+    title: String,
     icon: Int,
     onClick: () -> Unit,
+    backgroundColor: Color = Color.White,
+    imageRes: Int,
     modifier: Modifier,
+    color: Color
 ) {
     Card(
         modifier = modifier
-            .fillMaxWidth()
-            .height(60.dp),
-
-        shape = RoundedCornerShape(12.dp),
-        elevation = 4.dp,
-        backgroundColor = PurpleBoxColor
+//            .width(200.dp)
+            .padding(4.dp),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.2f)),
+//        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        onClick = onClick
     ) {
-        Row(
-            modifier = modifier
-                .fillMaxWidth()
-                .height(60.dp)
-                .clickable(onClick = onClick),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+        Column(
+            modifier = Modifier.fillMaxWidth()
         ) {
-
-            Row(
+            Box(
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 16.dp, end = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .fillMaxWidth()
+                    .height(120.dp)
+                    .padding(8.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(backgroundColor),
+                contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    painter = painterResource(id = icon),
-                    contentDescription = text,
-                    tint = Color.White
-                )
-                Text(
-                    text,
-                    color = Color.White
+                Image(
+                    painter = painterResource(id = imageRes),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
                 )
             }
 
-            Icon(
-                Icons.Default.KeyboardArrowRight,
-                contentDescription = text,
-                tint = Color.White,
-                modifier = Modifier.padding(end = 16.dp)
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        painter = painterResource(id = icon),
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                        tint = color
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = title,
+//                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = color
+                    )
+                }
+
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowRight,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),
+                    tint = color
+                )
+            }
         }
     }
+}
+
+
+@SuppressLint("ViewModelConstructorInComposable")
+@Preview(showBackground = true, showSystemUi = true, device = "spec:width=411dp,height=891dp")
+@Composable
+fun DrawOptionScreenPreview() {
+    DrawOptionScreen(
+        modifier = Modifier,
+        navController = NavController(LocalContext.current),
+        image = ImageSourceType.Url("https://picsum.photos/200"),
+        vm2 = SharedDrawImageViewModel()
+    )
 }

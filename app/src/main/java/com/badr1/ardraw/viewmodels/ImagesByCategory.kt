@@ -1,4 +1,3 @@
-
 package com.badr1.ardraw.viewmodels
 
 import android.util.Log
@@ -129,12 +128,18 @@ class ImagesByCategory : ViewModel() {
                     async(Dispatchers.IO) {
                         val path = "${category.category}/${subcategory.subcategory}"
                         val imageUrls = getImagesUrls(path)
-                        Log.d("SubcategoryBox", "Loaded ${imageUrls.size} images for: ${subcategory.subcategory}")
+                        if (imageUrls.isEmpty()) {
+                            return@async null
+                        }
+                        Log.d(
+                            "SubcategoryBox",
+                            "Loaded ${imageUrls.size} images for: ${subcategory.subcategory}"
+                        )
                         ImagesDisplayingControl(subcategory, imageUrls)
                     }
                 }
 
-                val controlList = tasks.awaitAll()
+                val controlList = tasks.awaitAll().filterNotNull()
 
                 withContext(Dispatchers.Main) {
                     _imagesDisplayingControl.clear()

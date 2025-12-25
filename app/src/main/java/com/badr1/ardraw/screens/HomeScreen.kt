@@ -1,5 +1,6 @@
 package com.badr1.ardraw.screens
 
+import android.app.Activity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -9,16 +10,21 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Card
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -26,21 +32,30 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.badr1.ardraw.R
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
+import com.badr1.ardraw.Graph
 import com.badr1.ardraw.navigation.Screen
+import com.badr1.ardraw.screens.components.BannerAdView
 import com.badr1.ardraw.ui.theme.BlueBoxColor
+import com.badr1.ardraw.ui.theme.CustomBlue
+import com.badr1.ardraw.ui.theme.CustomBrown
+import com.badr1.ardraw.ui.theme.CustomPurple
 import com.badr1.ardraw.ui.theme.CyanBoxColor
 import com.badr1.ardraw.ui.theme.PinkBoxColor
 import com.badr1.ardraw.ui.theme.PurpleBoxColor
@@ -53,195 +68,168 @@ import com.badr1.ardraw.viewmodels.SharedDrawImageViewModel
 fun HomeScreen(
     modifier: Modifier,
     navController: NavController,
-    vm: ImagesByCategory,
+    viewModel: ImagesByCategory,
+    vm2: SharedDrawImageViewModel
 ) {
-    val tools = listOf<DrawToolsList>(
-        DrawToolsList(
-            R.drawable.paint_palette,
-            "Draw with Template",
-            CyanBoxColor,
-            route = Screen.ImagesByCategoryRoute.route
-        ),
-        DrawToolsList(
-            R.drawable.paint_palette,
-            "Draw with Gallery",
-            PurpleBoxColor,
-            route = Screen.OnlineImageSearchRoute.route
-        ),
-        DrawToolsList(
-            R.drawable.paint_palette,
-            "Draw with Collection",
-            BlueBoxColor,
-            route = Screen.TextRoute.route
-        ),
-        DrawToolsList(R.drawable.paint_palette, "Text Art", PinkBoxColor, route = "")
-    )
+    val selectedCategory by viewModel.selectedCategory
+    val imagesDisplayingControl = viewModel.imagesDisplayingControl
+
+    val context = LocalContext.current
+    val activity = context as? Activity
+    val interstitialAdManager = Graph.interstitialAdManager
 
     LaunchedEffect(Unit) {
-        vm.initGetDatabase()
+        if (viewModel.categories.isEmpty()) {
+            viewModel.initGetDatabase()
+        }
     }
-
-    Column(modifier.fillMaxSize()) {
-        HomeHeader(modifier)
+    Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Column(modifier.fillMaxWidth()) {
-                Text("Tools", style = MaterialTheme.typography.h6, fontWeight = FontWeight.W800)
-                Box(
-                    modifier = Modifier
-                        .width(45.dp) // same width as box
-                        .height(8.dp)  // bar height
-                        .clip(RoundedCornerShape(4.dp)) // rounded bar
-                        .background(
-                            brush = Brush.horizontalGradient(
-                                colors = listOf(
-                                    PurpleGradientStart,
-                                    Color.Transparent
-                                ) // purple gradient
-                            )
-                        )
-                )
-            }
-            Spacer(modifier.height(16.dp))
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                contentPadding = PaddingValues(8.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.fillMaxSize()
-            ) {
-                items(tools) { item ->
-                    ToolsContainer(item, onClick = {
-                        if (!item.route.isEmpty()) {
-                            navController.navigate(item.route)
-                        }
-                    })
-                }
-            }
-
-        }
-    }
-}
-
-
-@Composable
-fun ToolsContainer(item: DrawToolsList, onClick: () -> Unit) {
-    Box(
-        Modifier
-            .clickable(
-                onClick = { onClick() },
-            )
-            .fillMaxWidth()
-            .height(170.dp)
-            .shadow(
-                elevation = 8.dp,        // shadow size
-                shape = RoundedCornerShape(16.dp),
-                clip = false              // do not clip content
-            )
-            .background(color = item.color, shape = RoundedCornerShape(16.dp))
-    ) {
-        Column(
-            Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Row(
-                Modifier
-                    .clip(RoundedCornerShape(100))
-                    .background(color = Color.White)
-                    .padding(8.dp),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Image(
-                    painter = painterResource(id = item.image),
-                    contentDescription = "Title",
-                    modifier = Modifier.size(80.dp), // adjust size as needed
-                    contentScale = ContentScale.Crop // scale the image nicely
-                )
-            }
-            Spacer(Modifier.height(8.dp))
-            Text(
-                item.text,
-                style = MaterialTheme.typography.subtitle2,
-                color = Color.White,
-                textAlign = TextAlign.Center
-            )
-        }
-    }
-}
-
-
-@Composable
-fun HomeHeader(modifier: Modifier) {
-    Box(
-        modifier
-            .fillMaxWidth()
-            .height(200.dp)
-            .shadow(
-                elevation = 16.dp, // shadow size
-                shape = RoundedCornerShape(
-                    topStart = 0.dp,
-                    topEnd = 0.dp,
-                    bottomStart = 24.dp,
-                    bottomEnd = 24.dp
-                ), // shape of the shadow
-                clip = true // if true, content will be clipped to shape
-            )
-            .background(
-                Color.Blue, shape = RoundedCornerShape(
-                    topStart = 0.dp,
-                    topEnd = 0.dp,
-                    bottomStart = 24.dp,
-                    bottomEnd = 24.dp
-                )
-            )
-    ) {
-        Row(
-            Modifier.fillMaxSize()
-        ) { }
-        Image(
-            painter = painterResource(id = R.drawable.app_banner),
-            contentDescription = "App Banner Image",
-            modifier = Modifier.fillMaxSize(), // adjust size as needed
-            contentScale = ContentScale.Crop // scale the image nicely
-        )
-        Row(
-            Modifier
                 .fillMaxSize()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.End
+                .padding(horizontal = 16.dp)
         ) {
             Row(
                 modifier
-                    .clip(
-                        RoundedCornerShape(
-                            topStart = 8.dp,
-                            topEnd = 8.dp,
-                            bottomStart = 8.dp,
-                            bottomEnd = 8.dp
-                        )
-                    )
-                    .background(color = Color.Black)
-                    .padding(8.dp)
+                    .fillMaxWidth()
+                    .height(50.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    Icons.Default.Settings,
-                    contentDescription = "Settings",
-                    tint = Color.White
+                Text(
+                    "Ar Drawing",
+                    style = MaterialTheme.typography.h5,
+                    fontWeight = FontWeight.W800
                 )
             }
+            Spacer(modifier.height(4.dp))
+            Card(
+                modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
+                shape = RoundedCornerShape(24.dp)
+            ) {
+                Box(
+                    modifier
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.main_screen),
+                        contentDescription = "App Banner Image",
+                        modifier = modifier
+                            .fillMaxWidth()
+                            .aspectRatio(16f / 9f), // adjust size as needed
+                        contentScale = ContentScale.Crop // scale the image nicely
+                    )
+                }
+            }
+            Spacer(modifier.height(16.dp))
+            Row(
+                modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                NavIcons(
+                    modifier,
+                    color = CustomPurple,
+                    icon = R.drawable.browser,
+                    text = "Browser",
+                    onClick = { navController.navigate(Screen.OnlineImageSearchRoute.route) })
+
+                Spacer(modifier.width(56.dp))
+                NavIcons(
+                    modifier,
+                    color = CustomBlue,
+                    icon = R.drawable.outline_insert_text_24,
+                    text = "Text",
+                    onClick = {
+                        navController.navigate(Screen.TextRoute.route)
+                    }
+                )
+                Spacer(modifier.width(56.dp))
+                NavIcons(
+                    modifier,
+                    color = CustomBrown,
+                    icon = R.drawable.baseline_folder_24,
+                    text = "Saved",
+                    onClick = { navController.navigate(Screen.GalleryRoute.route) }
+                )
+            }
+            Spacer(modifier.height(8.dp))
+            Divider()
+            Spacer(modifier.height(8.dp))
+            CategoriesSlider(viewModel.categories, selectedCategory, onClick = { cat ->
+                viewModel.onCategoryChanged(cat)
+            })
+            if (viewModel.isLoading.value) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularProgressIndicator(
+                        color = CustomPurple.copy(alpha = 0.5f)
+                    )
+                }
+            }
+
+            viewModel.errorMessage.value?.let { error ->
+                Text(text = error, color = Color.Red)
+            }
+//        if (imagesDisplayingControl.isNotEmpty()) {
+            SubcategoriesBox(imagesDisplayingControl, navController, onImageClick = { image ->
+                vm2.setSelectedImage(image)
+                navController.navigate(Screen.DrawOptionRoute.route)
+            })
+//        }
         }
+        BannerAdView(
+            modifier = modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+        )
     }
 }
 
-data class DrawToolsList(
-    val image: Int = 0,
-    val text: String = "",
-    val color: Color = Color.White,
-    val route: String = ""
-)
+@Composable
+fun NavIcons(modifier: Modifier, color: Color, icon: Int, text: String, onClick: () -> Unit) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Card(
+            modifier = modifier.size(56.dp), // The size of the outer card
+            shape = RoundedCornerShape(16.dp) // Optional: for rounded corners
+        ) {
+            Box(
+                contentAlignment = Alignment.Center, // Centers the icon inside the 60dp card
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        color = color.copy(alpha = 0.2f),
+//                                shape = CircleShape // Optional: makes the background circular
+                    )
+                    .clickable {
+                        onClick()
+                    }
+            ) {
+                Icon(
+                    painter = painterResource(id = icon),
+                    contentDescription = "Settings",
+                    modifier = Modifier
+                        .size(24.dp) // The actual size of the icon
+                    ,
+                    tint = color
+                )
+            }
+        }
+        Text(text, style = MaterialTheme.typography.subtitle2, fontWeight = FontWeight.W400)
+    }
+}
+
+//@Preview(showBackground = true, showSystemUi = true, device = "spec:width=411dp,height=891dp")
+//@Composable
+//fun HomeScreenPreview(modifier: Modifier = Modifier) {
+//    HomeScreen(modifier, NavController(LocalContext.current))
+//}
